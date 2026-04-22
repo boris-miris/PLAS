@@ -169,7 +169,7 @@ def divisors(n):
     )
 
 
-# @torch.compile(fullgraph=True)
+@torch.compile(fullgraph=True)
 def params_to_blocky(
     params, block_size, block_divisor, num_pixel_blocks, shift_y, shift_x
 ):
@@ -221,7 +221,7 @@ def params_to_blocky(
     return params_rolled, params_blocky_flat
 
 
-# @torch.compile(fullgraph=True)
+@torch.compile(fullgraph=True)
 def blocky_to_params(
     params_rolled,
     params_blocky_flat,
@@ -273,7 +273,7 @@ def blocky_to_params(
     return params
 
 
-# @torch.compile(options={"epilogue_fusion": True, "max_autotune": True})
+@torch.compile(options={"epilogue_fusion": True, "max_autotune": True})
 def reorder_blocky_shuffled(
     params_blocky_flat, grid_indices_blocky_flat, target_blocky_flat, block_size
 ):
@@ -330,7 +330,7 @@ def reorder_blocky_shuffled(
     return params_blocky_flat, grid_indices_blocky_flat.contiguous()
 
 
-# @torch.compile
+@torch.compile
 def reorder_plas(
     params,
     grid_indices,
@@ -376,7 +376,6 @@ def reorder_plas(
     # for block_configs in range(5):
     block_config = 0
     while True:
-
         shift_y = np.random.randint(0, block_size)
         shift_x = np.random.randint(0, block_size)
 
@@ -404,7 +403,6 @@ def reorder_plas(
         i = 0
         has_improved = False
         while True:
-
             num_reorders += 1
 
             # all indices of pixels in the block, shuffled
@@ -495,7 +493,7 @@ def sort_with_plas(
     seed=None,
     verbose=False,
 ):
-    """ Sorts a set of parameters in a 2xn grid using the Parallel Linear Assignment Sorting (PLAS) algorithm.
+    """Sorts a set of parameters in a 2xn grid using the Parallel Linear Assignment Sorting (PLAS) algorithm.
 
     Args:
         border_type_x/y (str): Border for the Gaussian blur that is performed to create the targets for sorting.
@@ -517,7 +515,9 @@ def sort_with_plas(
     start_time = time.time()
 
     radius_f = max(H, W) / 2 - 1
-    radii = list(radius_seq(max_radius=radius_f, min_radius=min_blur_radius, radius_update=0.95))
+    radii = list(
+        radius_seq(max_radius=radius_f, min_radius=min_blur_radius, radius_update=0.95)
+    )
 
     if verbose:
         pbar = tqdm(radii)
@@ -527,7 +527,6 @@ def sort_with_plas(
     total_num_reorders = 0
 
     with torch.inference_mode():
-
         grid_indices = (
             torch.arange(0, H * W, dtype=torch.int32, device=params.device)
             .reshape(grid_shape)
